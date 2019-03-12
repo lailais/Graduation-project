@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/home.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/ajaxFileUpload.js"></script>
+    <script src="../js/socket.io.js"></script>
+    <script src="../js/home.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="orderList">
+            <div class="uncookList list">未制作<i class="icon-goright"></i>
+                <div class="uncookList-container">
+                    <div class="back">
+                        <i class="icon-goleft"></i>
+                        <span>返回</span>
+                    </div>
+                    <div class="title">未制作</div>
+                    <div class="clear"></div>
+                    <ul class="uncookList-ul"></ul>
+                </div>
+            </div>
+            <div class="unpayList list">未支付<i class="icon-goright"></i>
+                <div class="unpayList-container">
+                    <div class="back">
+                        <i class="icon-goleft"></i>
+                        <span>返回</span>
+                    </div>
+                    <div class="title">未支付</div>
+                    <div class="clear"></div>
+                    <ul class="unpayList-ul"></ul>
+                </div>
+            </div>
+            <div class="payList list">已支付<i class="icon-goright"></i>
+                <div class="payList-container">
+                    <div class="back">
+                            <i class="icon-goleft"></i>
+                            <span>返回</span>
+                    </div>
+                    <div class="title">已支付</div>
+                    <div class="clear"></div>
+                    <ul>
+                        <li deskId = "01" orderId="2432425">
+                            <div class="deskInfo">
+                                <h2>订单号：452355345</h2>
+                                <h2>桌号：01</h2>
+                                <h3>总计：402</h3>
+                                <h3>结账时间：2018.03.04</h3>
+                            </div>
+                        </li>
+                        <li deskId = "01" orderId="2432425">
+                            <div class="deskInfo">
+                                <h2>订单号：452355345</h2>
+                                <h2>桌号：01</h2>
+                                <h3>总计：402</h3>
+                                <h3>结账时间：2018.03.04</h3>
+                            </div>
+                        </li>
+                        <li deskId = "01" orderId="2432425">
+                            <div class="deskInfo">
+                                <h2>订单号：452355345</h2>
+                                <h2>桌号：01</h2>
+                                <h3>总计：402</h3>
+                                <h3>结账时间：2018.03.04</h3>
+                            </div>
+                        </li>
+                        <li deskId = "01" orderId="2432425">
+                            <div class="deskInfo">
+                                <h2>订单号：452355345</h2>
+                                <h2>桌号：01</h2>
+                                <h3>总计：402</h3>
+                                <h3>结账时间：2018.03.04</h3>
+                            </div>
+                        </li>
+                        <li deskId = "01" orderId="2432425">
+                            <div class="deskInfo">
+                                <h2>订单号：452355345</h2>
+                                <h2>桌号：01</h2>
+                                <h3>总计：402</h3>
+                                <h3>结账时间：2018.03.04</h3>
+                            </div>
+                        </li>
+                        <li deskId = "01" orderId="2432425">
+                            <div class="deskInfo">
+                                <h2>订单号：452355345</h2>
+                                <h2>桌号：01</h2>
+                                <h3>总计：402</h3>
+                                <h3>结账时间：2018.03.04</h3>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="shopList">
+            gdfgdsfgsdf
+        </div>
+    </div>
+    <div class="body"></div>
+    <div class="footer">
+        <div class="order-info active">订单列表</div>
+        <div class="shop-info">菜品信息</div>
+    </div>
+</div>
+
+<div id="subOrderDetail">
+    <div class="close">x</div>
+    <div class="subOrderDetail-container"></div>
+    <div class="btn-container">
+        <span class="cook-btn btn">制作</span>
+        <span class="change-btn btn">修改</span>
+        <span class="cancel-btn btn">取消修改</span>
+        <span class="confirm-btn btn">确定修改</span>
+    </div>
+</div>
+
+<div id="unpayOrderDetail">
+    <div class="close">x</div>
+    <div class="unpayOrderDetail-container">
+
+    </div>
+    <div class="btn-container">
+        <div class="checkout-btn btn">结账</div>
+    </div>
+</div>
+
+<div id="payOrderDetail">
+    <div class="close">x</div>
+    <div class="payOrderDetail-container"></div>
+</div>
+</body>
+</html>

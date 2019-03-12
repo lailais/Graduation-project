@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="https://cdn.bootcss.com/react/16.4.0/umd/react.development.js"></script>
+  <script src="https://cdn.bootcss.com/react-dom/16.4.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.bootcss.com/babel-standalone/6.26.0/babel.min.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script type="text/babel">
+  class MyFrom extends React.Component{
+    constructor(props){
+      super(props)
+      this.state = {
+        value: 'aaa',
+        textarea:'',
+        value1:'bb',
+        value2:'bb',
+        value3:'bb',
+        value4:'bb'
+      }
+      this.handle = this.handle.bind(this) // 记得绑定this
+      this.textareaHandle = this.textareaHandle.bind(this) // 记得绑定this
+      this.changeAll = this.changeAll.bind(this)
+    }
+    handle(e) {
+      this.setState({value:e.target.value}) // 当与表单绑定数据时,该表单将会成为一个受控组件,不仅需要绑定state,还要指定组件发生改变对应state值的函数句柄
+    }
+    textareaHandle(e){
+      this.setState({textarea:e.target.value})
+    }
+
+    changeAll(e) {
+      this.setState({[e.target.name]:e.target.value})
+    }
+
+
+    render() {
+      return(
+        <div>
+          <p><input type="text" value={this.state.value} onChange={this.handle}/></p>
+          <p><textarea name="" id="" cols="30" rows="10" value={this.state.textarea} onChange={this.textareaHandle}></textarea></p>
+          通过新增name属性 定义同个函数,不同name,以改变对应的value值
+          <p><input type="text" value={this.state.value1} name="value1" onChange={this.changeAll}/></p>
+          <p><input type="text" value={this.state.value2} name="value2" onChange={this.changeAll}/></p>
+          <p><input type="text" value={this.state.value3} name="value3" onChange={this.changeAll}/></p>
+          <p><input type="text" value={this.state.value4} name="value4" onChange={this.changeAll}/></p>
+        </div>
+      )
+    }
+  }
+ ReactDOM.render(<MyFrom></MyFrom>, document.getElementById('app'))
+</script>
+</body>
+</html>
