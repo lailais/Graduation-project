@@ -197,6 +197,9 @@ ul{
     font-weight: 700;
     margin-right: 3px;
 }
+#subOrderDetail > div.subOrderDetail-container > table > tbody > tr > td:nth-child(1) > .name{
+    display: inline-block;
+}
 #subOrderDetail>.btn-container{
     width: 150px;
     margin: 50px auto;

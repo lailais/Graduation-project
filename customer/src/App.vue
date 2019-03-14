@@ -50,6 +50,19 @@ export default {
     this.obtainData()
     this.getData()
   },
+  sockets: {
+    frombSeleted: function (data) { // 调用多次
+      if (!data.unpayList && data.deskId === this.deskId) { // 点击结账后返回的unpayList是undefined
+        this.unpayList = data.unpayList
+        this.subOrderListId = 1 // 清单序号
+        return
+      }
+      if (data.deskId === this.deskId) { // 判断商家更新数据是否为本桌数据
+        this.unpayList = data.unpayList
+        console.log('订单已更改')
+      }
+    }
+  },
   mounted () {
     this.getOderInfo()
   },

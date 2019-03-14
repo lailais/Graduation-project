@@ -4,6 +4,10 @@ $(()=>{
     var bSelected = []
     var subTotal = 0
     var payOrderList = []
+    var payList = []
+    var subOrderDetailDeskId = 0
+    var subOrderDetailSubOrderListId = 0
+    var payOrderDetailDeskId = 0
 
     $.ajax({
         type: "GET",
@@ -11,8 +15,8 @@ $(()=>{
         dataType: "json",
         success: function (list) {
             updataList(list.unpayList)
-            console.log(unCookList)
-            console.log(currentOrderList)
+            // console.log(unCookList)
+            // console.log(currentOrderList)
             renderUncookList(unCookList)
             renderUnpayList(currentOrderList)
         },
@@ -42,7 +46,24 @@ $(()=>{
 
     //show uncookList
     $('.orderList').on('click', '.uncookList>div>ul>li', (event)=>{
-        renderSubOrderDetail($(event.currentTarget).attr('deskId'),$(event.currentTarget).attr('subOrderListId'))
+        subOrderDetailDeskId = $(event.currentTarget).attr('deskId')
+        subOrderDetailSubOrderListId = $(event.currentTarget).attr('subOrderListId')
+        renderSubOrderDetail(subOrderDetailDeskId,subOrderDetailSubOrderListId)
+    })
+    $('.orderList').on('click', '.uncookList>div>ul>li>.btn-container>.change-btn', (event)=>{
+        event.stopPropagation()
+        subOrderDetailDeskId = $(event.currentTarget).parents("li").attr('deskId')
+        subOrderDetailSubOrderListId = $(event.currentTarget).parents("li").attr('subOrderListId')
+        renderSubOrderDetail(subOrderDetailDeskId,subOrderDetailSubOrderListId)
+        renderBtn(true)
+        initBselected(subOrderDetailDeskId, subOrderDetailSubOrderListId)
+        $('#subOrderDetail > div.subOrderDetail-container > table > tbody > tr span ').css('display','inline-block')
+    })
+    $('.orderList').on('click', '.uncookList>div>ul>li>.btn-container>.cook-btn', (event)=>{
+        event.stopPropagation()
+        subOrderDetailDeskId = $(event.currentTarget).parents("li").attr('deskId')
+        subOrderDetailSubOrderListId = $(event.currentTarget).parents("li").attr('subOrderListId')
+        updataCook(subOrderDetailDeskId, subOrderDetailSubOrderListId)
     })
     $('#subOrderDetail > div.close').click((event)=>{
         $(event.target).parent('#subOrderDetail').hide()
@@ -50,15 +71,28 @@ $(()=>{
     })
     $('#subOrderDetail > div.btn-container > span.change-btn.btn').click((event)=>{
         renderBtn(true)
+        initBselected(subOrderDetailDeskId, subOrderDetailSubOrderListId)
         $('#subOrderDetail > div.subOrderDetail-container > table > tbody > tr span ').css('display','inline-block')
     })
+    $('#subOrderDetail > div.btn-container > span.cook-btn.btn').click((event)=>{
+        updataCook(subOrderDetailDeskId, subOrderDetailSubOrderListId)
+        $(event.target).parents('#subOrderDetail').hide()
+    })
     $('#subOrderDetail > div.btn-container > span.cancel-btn.btn').click((event)=>{
+        renderSubOrderDetail(subOrderDetailDeskId,subOrderDetailSubOrderListId)
         renderBtn(false)
         $('#subOrderDetail > div.subOrderDetail-container > table > tbody > tr span ').hide()
     })
     $('#subOrderDetail > div.btn-container > span.confirm-btn.btn').click((event)=>{
         renderBtn(false)
         $('#subOrderDetail > div.subOrderDetail-container > table > tbody > tr span ').hide()
+        socket.emit('bSelected', { //向后台触发bSelected事件，并传参
+            'bSelected': bSelected.subShopList,
+            'subOrderListId': bSelected.subOrderListId,
+            'deskId':bSelected.deskId,
+            'subTotal': bSelected.subTotal,
+            'status': 0
+        })
     })
     $('#subOrderDetail').on('touchend','.subOrderDetail-container > table > tbody > tr > td:nth-child(1) > span',(event)=>{
         renderChangeCount(2)
@@ -72,20 +106,75 @@ $(()=>{
 
     //show unpayList
     $('.orderList').on('click','.unpayList.list > div > ul > li', (event)=>{
-        renderUnpayOrderDetail($(event.currentTarget).attr('deskId'))
+        payOrderDetailDeskId = $(event.currentTarget).attr('deskId')
+        renderUnpayOrderDetail(payOrderDetailDeskId)
     })
     $('#unpayOrderDetail').on('click', '.close', ()=>{
     $('#unpayOrderDetail').hide()
     })
+    $('.orderList').on('click','.unpayList.list > div > ul > li > .btn-container > .checkout-btn', (event)=>{
+        event.stopPropagation()
+        let deskId = $(event.currentTarget).parents("li").attr("deskId")
+        for (let i = 0; i < currentOrderList.length; i++) {
+            if (currentOrderList[i].deskId == deskId) {
+                for (let j = 0; j < currentOrderList[i].shopList.length; j++) {
+                    if (!currentOrderList[i].shopList[j].status) {
+                        alert("该订单还有未制作的清单！！")
+                        return
+                    }
+                }
+                socket.emit('payDeckId', { //向后台触发payDeckId事件，并传参
+                    'deskId': deskId,
+                })
+                for(let i = 0; i<currentOrderList.length; i++){
+                    if(currentOrderList[i].deskId == deskId) {
+                        currentOrderList.splice(i,1) // 更新未支付数组
+                        renderUnpayList(currentOrderList)// 更新未支付列表
+                    }
+                }
+            }
+        }
+    })
+    $('#unpayOrderDetail > div.btn-container > .checkout-btn').click((event)=>{
+        for (let i = 0; i < currentOrderList.length; i++) {
+            if (currentOrderList[i].deskId == payOrderDetailDeskId) {
+                for (let j = 0; j < currentOrderList[i].shopList.length; j++) {
+                    if (!currentOrderList[i].shopList[j].status) {
+                        alert("该订单还有未制作的清单！！")
+                        return
+                    }
+                }
+                socket.emit('payDeckId', { //向后台触发payDeckId事件，并传参
+                    'deskId': payOrderDetailDeskId,
+                })
+                for(let i = 0; i<currentOrderList.length; i++){
+                    if(currentOrderList[i].deskId == payOrderDetailDeskId) {
+                        currentOrderList.splice(i,1) // 更新未支付数组
+                        renderUnpayList(currentOrderList)// 更新未支付列表
+                    }
+                }
+                $('#unpayOrderDetail').hide()
+            }
+        }
+    })
 
     //show payList
     $('.payList').on('click', (event)=>{
-        console.log('ccc')
-        console.log(event.target)
+        $.ajax({
+            type: "GET",
+            url: 'http://localhost:3000/payList',
+            dataType: "json",
+            success: function (list) {
+                payList = list.payList
+                renderPayList(list.payList)
+            },
+            error: function (data) {
+                console.log('error')
+            }
+        })
     })
     $('.orderList').on('click','.payList.list > div > ul > li', (event)=>{
         renderPayOrderDetail($(event.currentTarget).attr('orderId'))
-        console.log($(event.currentTarget).attr('orderId'))
     })
     $('#payOrderDetail').on('click', '.close', ()=>{
         $('#payOrderDetail').hide()
@@ -110,7 +199,6 @@ $(()=>{
     function updataList(cSelected) { // 更新已选择列表
         for (let i = 0; i < cSelected.length; i++) {
             for (let j = 0; j < cSelected[i].shopList.length; j++) {
-                // console.log(cSelected[i].shopList[j])
                 if (cSelected[i].shopList[j].status == 0) {
                     unCookList.push(cSelected[i].shopList[j]) // 更新未制作清单数组
                 }
@@ -148,11 +236,27 @@ $(()=>{
                                 <h2>总计：${list[i].total}</h2>
                             </div>
                             <div class="btn-container">
-                                <span class="cook-btn btn">结账</span>
+                                <span class="checkout-btn btn">结账</span>
                             </div>
                         </li>`
         }
         $('.unpayList .unpayList-ul').html(x)
+    }
+
+    function renderPayList(list) {
+        let x = ''
+        for(let i = 0; i < list.length; i++){
+            x += `
+            <li deskId = "${list[i].deskId}" orderId="${list[i].id}">
+                                <div class="deskInfo">
+                                    <h2>订单号：${list[i].id}</h2>
+                                    <h2>桌号：${list[i].deskId}</h2>
+                                    <h3>总计：${list[i].total}</h3>
+                                    <h3>结账时间：${getTemplateDate(list[i].payTime)}</h3>
+                                </div>
+                            </li>`
+        }
+        $('.orderList > div.payList.list > div > .payList-ul').html(x)
     }
 
     function renderSubOrderDetail(deskId,subOrderListId) {
@@ -169,17 +273,17 @@ $(()=>{
                 <td>数量</td>
                 <td>总价</td>
             </tr>`
-                    for(let j=0; j<unCookList[i].subShopList.length; j++){
+                for(let j=0; j<unCookList[i].subShopList.length; j++){
                     x +=   `<tr align="center">
-                <td><span>-</span>${unCookList[i].subShopList[j].name}</td>
+                <td><span>-</span><div class="name">${unCookList[i].subShopList[j].name}</div></td>
                 <td>${unCookList[i].subShopList[j].price}</td>
                 <td><span>-</span><div style="display: inline-block;" class="text">${unCookList[i].subShopList[j].count}</div><span>+</span></td>
                 <td>${unCookList[i].subShopList[j].price*unCookList[i].subShopList[j].count}</td>
             </tr>`
-                    }
+                }
                 x += `</table><div class="subtotal">小计：${unCookList[i].subTotal}</div>`
             }
-            }
+        }
         $('#subOrderDetail>.subOrderDetail-container').html(x)
         $('#subOrderDetail').show()
     }
@@ -208,7 +312,7 @@ $(()=>{
                 for(let j = 0; j<currentOrderList[i].shopList.length; j++){
                     let shopList = currentOrderList[i].shopList[j]
                     x += `<li>
-                <h3 class="subOrderListId">清单号：${shopList.subOrderListId}</h3>
+                <h3 class="subOrderListId">清单号：${shopList.subOrderListId}&nbsp;&nbsp;${shopList.status?"已制作":"未制作"}</h3>
                 <table cellspacing="0" cellpadding="0" border="0">
                     <tr align="center">
                         <td>菜名</td>
@@ -237,149 +341,39 @@ $(()=>{
 
     function renderPayOrderDetail(orderId) {
         let x = ''
-        x += `
-         <h2 class="orderId">订单号：${orderId}</h2>
-        <h2 class="checkout-time">结账时间：2018.03.04</h2>
-        <h2 class="deskId">桌号：03</h2>
-        <ul>
-            <li>
-                <h3 class="subOrderListId">清单号：02</h3>
+        for(let i = 0 ; i < payList.length; i++){
+            if(payList[i].id == orderId){
+                x += `
+                <h2 class="orderId">订单号：${orderId}</h2>
+                <h2 class="checkout-time">结账时间：${getTemplateDate(payList[i].payTime)}</h2>
+                <h2 class="deskId">桌号：${payList[i].deskId}</h2>
+                <ul>`
+                for(let j = 0; j < payList[i].shopList.length; j++){
+                    let shopList = payList[i].shopList[j]
+                    x += `<li>
+                <h3 class="subOrderListId">清单号：${shopList.subOrderListId}</h3>
                 <table cellspacing="0" cellpadding="0" border="0">
                     <tr align="center">
-                        <td width="60">id</td>
                         <td>菜名</td>
-                        <td  width="50">单价</td>
-                        <td  width="60">数量</td>
-                        <td  width="50">小计</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">2423442</td>
-                        <td>ggdfgsd</td>
-                        <td  width="50">6</td>
-                        <td  width="60">4</td>
-                        <td  width="50">677</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">654643</td>
-                        <td>gdfggdfg</td>
-                        <td  width="50">6</td>
-                        <td  width="60">5</td>
-                        <td  width="50">67457</td>
-                    </tr>
-                </table>
-                <div class="sub-total">清单小结：535</div>
-            </li>
-            <li>
-                <h3 class="subOrderListId">清单号：02</h3>
-                <table cellspacing="0" cellpadding="0" border="0">
-                    <tr align="center">
-                        <td width="60">id</td>
-                        <td>菜名</td>
-                        <td  width="50">单价</td>
-                        <td  width="60">数量</td>
-                        <td  width="50">小计</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">2423442</td>
-                        <td>ggdfgsd</td>
-                        <td  width="50">6</td>
-                        <td  width="60">4</td>
-                        <td  width="50">677</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">654643</td>
-                        <td>gdfggdfg</td>
-                        <td  width="50">6</td>
-                        <td  width="60">5</td>
-                        <td  width="50">67457</td>
-                    </tr>
-                </table>
-                <div class="sub-total">清单小结：535</div>
-            </li>
-            <li>
-                <h3 class="subOrderListId">清单号：02</h3>
-                <table cellspacing="0" cellpadding="0" border="0">
-                    <tr align="center">
-                        <td width="60">id</td>
-                        <td>菜名</td>
-                        <td  width="50">单价</td>
-                        <td  width="60">数量</td>
-                        <td  width="50">小计</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">2423442</td>
-                        <td>ggdfgsd</td>
-                        <td  width="50">6</td>
-                        <td  width="60">4</td>
-                        <td  width="50">677</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">654643</td>
-                        <td>gdfggdfg</td>
-                        <td  width="50">6</td>
-                        <td  width="60">5</td>
-                        <td  width="50">67457</td>
-                    </tr>
-                </table>
-                <div class="sub-total">清单小结：535</div>
-            </li>
-            <li>
-                <h3 class="subOrderListId">清单号：02</h3>
-                <table cellspacing="0" cellpadding="0" border="0">
-                    <tr align="center">
-                        <td width="60">id</td>
-                        <td>菜名</td>
-                        <td  width="50">单价</td>
-                        <td  width="60">数量</td>
-                        <td  width="50">小计</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">2423442</td>
-                        <td>ggdfgsd</td>
-                        <td  width="50">6</td>
-                        <td  width="60">4</td>
-                        <td  width="50">677</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">654643</td>
-                        <td>gdfggdfg</td>
-                        <td  width="50">6</td>
-                        <td  width="60">5</td>
-                        <td  width="50">67457</td>
-                    </tr>
-                </table>
-                <div class="sub-total">清单小结：535</div>
-            </li>
-            <li>
-                <h3 class="subOrderListId">清单号：02</h3>
-                <table cellspacing="0" cellpadding="0" border="0">
-                    <tr align="center">
-                        <td width="60">id</td>
-                        <td>菜名</td>
-                        <td  width="50">单价</td>
-                        <td  width="60">数量</td>
-                        <td  width="50">小计</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">2423442</td>
-                        <td>ggdfgsd</td>
-                        <td  width="50">6</td>
-                        <td  width="60">4</td>
-                        <td  width="50">677</td>
-                    </tr>
-                    <tr align="center">
-                        <td  width="60">654643</td>
-                        <td>gdfggdfg</td>
-                        <td  width="50">6</td>
-                        <td  width="60">5</td>
-                        <td  width="50">67457</td>
-                    </tr>
-                </table>
-                <div class="sub-total">清单小结：535</div>
-            </li>
-        </ul>
-        <div class="total">总计：5345</div>
-        `
+                        <td>单价</td>
+                        <td>数量</td>
+                        <td>小计</td>
+                    </tr>`
+                        for(let k = 0 ; k < shopList.subShopList.length; k++){
+                            x += `<tr align="center">
+                        <td>${shopList.subShopList[k].name}</td>
+                        <td>${shopList.subShopList[k].price}</td>
+                        <td>${shopList.subShopList[k].count}</td>
+                        <td>${shopList.subShopList[k].price*shopList.subShopList[k].count}</td>
+                    </tr>`
+                        }
+                x += `</table>
+                <div class="sub-total">清单小结：${shopList.subTotal}</div>
+            </li>`
+                }
+                x += `</ul><div class="total">总计：${payList[i].total}</div>`
+            }
+        }
         $('#payOrderDetail>.payOrderDetail-container').html(x)
         $('#payOrderDetail').show()
     }
@@ -398,6 +392,7 @@ $(()=>{
         let oldCount = Number($(event.target).siblings('.text').text())
         let oldSubTotal = Number($(event.target).parents('tr').find('td:nth-child(4)').text())
         let oldTotal = Number($('#subOrderDetail>.subOrderDetail-container>.subtotal').text().split('：')[1])
+        let name = $(event.target).parents('tr').find('.name').text()
         let newCount = ''
         let newSubTotal = ''
         let newTotal = ''
@@ -405,15 +400,30 @@ $(()=>{
              newCount = ++oldCount
              newSubTotal = oldSubTotal + price
              newTotal = oldTotal + price
+            for(let i = 0; i<bSelected.subShopList.length; i++){
+                 if(bSelected.subShopList[i].name == name){
+                     bSelected.subShopList[i].count = newCount
+                 }
+            }
         } else if(type === 1) {
              newCount = --oldCount
              newSubTotal = oldSubTotal - price
              newTotal = oldTotal - price
+            for(let i = 0; i<bSelected.subShopList.length; i++){
+                if(bSelected.subShopList[i].name == name){
+                    bSelected.subShopList[i].count = newCount
+                }
+            }
         } else if(type === 2) {
             newCount = 0
             newTotal = oldTotal - oldSubTotal
+            for(let i = 0; i<bSelected.subShopList.length; i++){
+                if(bSelected.subShopList[i].name == name){
+                    bSelected.subShopList.splice(i, 1)
+                }
+            }
         }
-
+        bSelected.subTotal = newTotal
         if(newCount === 0){
             $(event.target).parents('tbody').find($(event.target).parent('td').parent('tr')).remove()
             $('#subOrderDetail>.subOrderDetail-container>.subtotal').text(`小计：${newTotal}`)
@@ -422,5 +432,20 @@ $(()=>{
         $(event.target).siblings('.text').text(newCount)
         $(event.target).parents('tr').find('td:nth-child(4)').text(newSubTotal)
         $('#subOrderDetail>.subOrderDetail-container>.subtotal').text(`小计：${newTotal}`)
+    }
+
+    function initBselected(deskId, subOrderListId) {
+        for(let i = 0;i<unCookList.length; i++){
+            if(unCookList[i].deskId == deskId && unCookList[i].subOrderListId == subOrderListId){
+                bSelected = JSON.parse(JSON.stringify(unCookList[i]))
+            }
+        }
+    }
+
+    function updataCook(deskId, subOrderListId) {
+        socket.emit('updataCook', { //向后台触发bSelected事件，并传参
+            'subOrderListId': subOrderListId,
+            'deskId': deskId,
+        })
     }
 })

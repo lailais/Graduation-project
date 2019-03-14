@@ -90,7 +90,7 @@ io.on("connection", function (socket) {
 
   // 商家点击确认修改
   socket.on('bSelected', function (data) {
-    // console.log(data)
+    console.log(data)
     MongoClient.connect(url, function (err, db) {
       var orderInfo = db.db("orderInfo")
       var unpayList = orderInfo.collection("unpayList") // unpayList未支付订单的集合
@@ -136,7 +136,7 @@ io.on("connection", function (socket) {
     })
   })
 
-  // 商家点击结账
+  // 商家点击下厨
   socket.on('updataCook', function (data) {
   MongoClient.connect(url, function (err, db) {
     var orderInfo = db.db("orderInfo")
@@ -189,7 +189,6 @@ socket.on('payDeckId', function (data) {
     var payList = orderInfo.collection("payList") // payList已支付订单的集合
     if (err) throw err;
     console.log("数据库已创建!");
-    console.log(data)
     unpayList.findOne( { "deskId": data.deskId },(err, result) => {
       result.payTime = +new Date() // 新增id，time，属性
       result.id = +new Date()
@@ -241,7 +240,7 @@ app.get('/unpayList', function (req, res) {
   })
 });
 
-// // 商家请求所有已支付列表
+// 商家请求所有已支付列表
 app.get('/payList', function (req, res) {
   MongoClient.connect(url, function (err, db) {
     if (err) throw err;

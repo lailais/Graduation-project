@@ -99,7 +99,6 @@
           // DOM 更新整个页面渲染完毕
           // 将页面元素初始化成better-scroll 实例
           this._initScroll()
-          console.log('aaa')
         })
       }
     },
