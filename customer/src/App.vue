@@ -90,7 +90,7 @@ export default {
     },
     getOderInfo() {
       let deskId = window.location.hash.slice(3, 5)
-      this.axios.get('http://localhost:3000/customerInfo', {
+      this.axios.get('http://172.20.10.2:3000/customerInfo', {
         params: {
           deskId
         }

@@ -36,10 +36,6 @@
         orderScoll: null
       }
     },
-    created() {
-//      this.getRatingData()
-//      console.log(this.unpayList)
-    },
     beforeRouteEnter (to, from, next) {
       next(vm => {
         vm._initScroll()
@@ -55,22 +51,6 @@
           return '未制作'
         }
       },
-//      getRatingData() {
-//        console.log(this.unpayList)
-//        this.axios.get('/api/ratings')
-//          .then(res => {
-//            res = res.data
-//            if (res.errCode === 0) {
-//              this.ratingList = res.data
-//              this.$nextTick(() => {
-//                this._initScroll()
-//              })
-//            }
-//          })
-//          .catch(err => {
-//            console.log(err)
-//          })
-//      },
       _initScroll() {
         if (!this.orderScoll) {
           this.orderScoll = new BScoll(this.$refs.orders, {
@@ -80,10 +60,6 @@
           this.orderScoll.refresh()
         }
       }
-//      toggleHasContent() {
-//        this.selectType.onlyContent = !this.selectType.onlyContent
-//        this._initScroll() // 刷新页面scroll
-//      }
     },
     filters: {
       formatDate(time) {

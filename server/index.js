@@ -246,14 +246,31 @@ app.get('/payList', function (req, res) {
     if (err) throw err;
     var orderInfo = db.db("orderInfo")
     var payList = orderInfo.collection("payList")
-    payList.find().sort({"payTime":-1}).toArray(function (err, result) { // 返回集合中所有数据
+    let today = new Date(new Date().toLocaleDateString()).getTime()
+    payList.find({payTime : {$gte  : today}}).sort({"payTime":-1}).toArray(function (err, result) { // 返回集合中今日已结账订单数据
       if (err) throw err;
-      // console.log(result);
       res.send(JSON.stringify({ "payList": result }))
       db.close()
     })
     db.close()
   })
+});
+
+//商家请求特定订单号
+app.get('/getInputOrderDetail', function (req, res) {
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var orderInfo = db.db("orderInfo")
+        var payList = orderInfo.collection("payList")
+        console.log(req.query.orderId)
+        payList.find({'id': +req.query.orderId}).toArray(function (err, result) { // 返回集合中今日已结账订单数据
+            if (err) throw err;
+            console.log(result)
+            res.send(JSON.stringify({ "payList": result }))
+            db.close()
+        })
+        db.close()
+    })
 });
 
 app.get('/allShopList', function (req, res) {

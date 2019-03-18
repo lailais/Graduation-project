@@ -4,14 +4,14 @@ $(()=>{
     var bSelected = []
     var subTotal = 0
     var payOrderList = []
-    var payList = []
+    var todayPayList = []
     var subOrderDetailDeskId = 0
     var subOrderDetailSubOrderListId = 0
     var payOrderDetailDeskId = 0
 
     $.ajax({
         type: "GET",
-        url: 'http://localhost:3000/unpayList',
+        url: 'http://172.20.10.2:3000/unpayList',
         dataType: "json",
         success: function (list) {
             updataList(list.unpayList)
@@ -25,17 +25,16 @@ $(()=>{
         }
     })
 
-    var socket = io.connect('http://localhost:3000/')
+    var socket = io.connect('http://172.20.10.2:3000/')
     socket.on('fromcSeleted', function (list) {
         unCookList = [] // 置空
         currentOrderList = []
         updataList(list.unpayList)
-        console.log(unCookList)
-        console.log(currentOrderList)
+        // console.log(unCookList)
+        // console.log(currentOrderList)
         renderUncookList(unCookList)
         renderUnpayList(currentOrderList)
     })
-
 
     $('.orderList').on('click', '.list', (event)=>{
         $(event.target).children('div').show()
@@ -162,10 +161,10 @@ $(()=>{
     $('.payList').on('click', (event)=>{
         $.ajax({
             type: "GET",
-            url: 'http://localhost:3000/payList',
+            url: 'http://172.20.10.2:3000/payList',
             dataType: "json",
             success: function (list) {
-                payList = list.payList
+                todayPayList = list.payList
                 renderPayList(list.payList)
             },
             error: function (data) {
@@ -179,13 +178,18 @@ $(()=>{
     $('#payOrderDetail').on('click', '.close', ()=>{
         $('#payOrderDetail').hide()
     })
-
-    //click shopInfo btn ,show shopList
-    $('.shop-info').click(()=> {
-        $('.orderList').hide()
-        $('.order-info').removeClass('active')
-        $('.shopList').show()
-        $('.shop-info').addClass('active')
+    $('.search>button').click((event)=>{
+        // renderPayOrderDetail($(event.target).siblings('input').val())
+        let orderId = $(event.target).siblings('input').val()
+        // 判断一串字符是不是全部是数字
+        var rex = /^[0-9]+$/;//正则表达式
+        var flag = rex.test(orderId);//通过表达式进行匹配
+        if (flag) {
+            renderInputOrderDetail(orderId)
+        } else {
+            alert("请输入正确的订单号");
+        }
+        $(event.target).siblings('input').val('')
     })
 
     //click orderList btn ,show orderList
@@ -194,6 +198,14 @@ $(()=>{
         $('.order-info').addClass('active')
         $('.shopList').hide()
         $('.shop-info').removeClass('active')
+    })
+
+    //click shopInfo btn ,show shopList
+    $('.shop-info').click(()=> {
+        $('.orderList').hide()
+        $('.order-info').removeClass('active')
+        $('.shopList').show()
+        $('.shop-info').addClass('active')
     })
 
     function updataList(cSelected) { // 更新已选择列表
@@ -339,7 +351,10 @@ $(()=>{
         $('#unpayOrderDetail').show()
     }
 
-    function renderPayOrderDetail(orderId) {
+    function renderPayOrderDetail(orderId, payList) {
+        if(!payList) {
+            payList = todayPayList
+        }
         let x = ''
         for(let i = 0 ; i < payList.length; i++){
             if(payList[i].id == orderId){
@@ -378,6 +393,25 @@ $(()=>{
         $('#payOrderDetail').show()
     }
 
+    function renderInputOrderDetail(orderId) {
+        $.ajax({
+            type: "GET",
+            url: 'http://172.20.10.2:3000/getInputOrderDetail',
+            data: {orderId},
+            dataType: "json",
+            success: function (list) {
+                if(list.payList.length <= 0){
+                    alert('订单不存在！')
+                    return
+                }
+                renderPayOrderDetail(orderId, list.payList)
+            },
+            error: function (data) {
+                console.log('error')
+            }
+        })
+    }
+
     function getTemplateDate(date) {
         let y = new Date(date).getFullYear()
         let m = new Date(date).getMonth()+1
@@ -412,6 +446,9 @@ $(()=>{
             for(let i = 0; i<bSelected.subShopList.length; i++){
                 if(bSelected.subShopList[i].name == name){
                     bSelected.subShopList[i].count = newCount
+                    if (newCount == 0){
+                        bSelected.subShopList.splice(i, 1)
+                    }
                 }
             }
         } else if(type === 2) {

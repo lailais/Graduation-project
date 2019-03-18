@@ -29,7 +29,7 @@
                     <div class="name">{{food.name}}</div>
                     <div class="desc">{{food.description}}</div>
                     <div class="extra">
-                      <span class="count">/*月售{{food.sellCount}}*/</span>
+                      <span class="count"></span>
                       <!--<span class="rating">评价{{food.rating}}%</span>-->
                     </div>
                     <div class="price">

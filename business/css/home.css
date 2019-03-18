@@ -89,10 +89,24 @@ ul{
     font-size: 18px;
     font-weight: 800;
 }
-
+.uncookList-container>ul, .unpayList-container>ul, .payList-container>.search{
+     width: 90vw;
+     height: 31px;
+     margin: 0 auto;
+     font-size: 14px;
+ }
+.search>input{
+    width: 77%;
+    height: 90%;
+}
+.search>button{
+    width: 20%;
+    height: 100%;
+    text-align: center;
+}
 .uncookList-container>ul, .unpayList-container>ul, .payList-container>ul{
     width: 90vw;
-    margin: 0 auto;
+    margin: 20px auto;
 }
 .uncookList-container>ul>li, .unpayList-container>ul>li, .payList-container>ul>li{
     position: relative;
