@@ -291,7 +291,6 @@ app.get('/changeShopList', function (req, res) {
 })
 
 app.get('/deleteFood', function (req, res) {
-  console.log(req.query)
     let name = req.query.name
     let index = req.query.groupIndex
     if(index !== undefined){
@@ -320,6 +319,20 @@ app.get('/deleteFood', function (req, res) {
     res.send({data: allShopList})
 })
 
+app.get('/addFood', function (req, res) {
+    let arr = req.query.arr
+    for(let k=0; k<arr.length; k++){
+        let index = Number(arr[k])
+        allShopList.goods[index].foods.push(req.query.foodObj)
+    }
+    // let str = JSON.stringify(allShopList)
+    // fs.writeFile(file,str,function(err){
+    //     if(err){
+    //         console.error(err);
+    //     }
+    // })
+    res.send({data: allShopList.goods})
+})
 
 
 app.use('/public', express.static('public'));

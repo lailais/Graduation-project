@@ -234,7 +234,14 @@ $(()=>{
         $('.shopList>.sub-header>.subHeader-ul>li').removeClass('active')
         $(`.shopList>.sub-header>.subHeader-ul>li:nth-child(${++id})`).addClass('active')
     })
-    $('.shopList').on('click', '.add', (event)=>{})
+    $('.shopList').on('click', '.add', (event)=>{
+        $('#addPopUp').show()
+        let x = ''
+        for(let i=0; i<allShopList.length; i++){
+            x += `<li>${allShopList[i].name}</li>`
+        }
+        $('#addPopUp>.list>ul').html(x)
+    })
     $('.shopList').on('click', '.content > .content-ul > li > div.btn-container > .change-btn', (event)=>{
         let oldImgUrl =  $(event.target).parents('.foods').children('.icon').children('img').attr('src')
         let oldName = $(event.target).parents('.foods').children('.name').children('span').eq(1).text()
@@ -279,11 +286,17 @@ $(()=>{
             deleteFoods(name, 0)
         }
     })
+    $('#foodDetail').on('click', 'div.container> .upLoadImg',(()=>{
+        $('#foodDetail input[type=file]').click()
+    }))
+    $('#foodDetail').on('change','input[type=file]',(()=>{
+        selectImg($('#foodDetail input[type=file]')[0], $('#foodDetail .newImg')[0])
+    }))
     $('#foodDetail>.close,#foodDetail>.btn-container').click(()=>{
         $('#foodDetail').css('display','none')
     })
     $('#foodDetail>.btn-container>.confirm-btn').click((event)=>{
-        let newImgUrl =  $(event.target).parents('#foodDetail').find('.img').children('img').attr('src')
+        let newImgUrl =  $(event.target).parents('#foodDetail').find('.newImg').attr('src')
         let newName = $(event.target).parents('#foodDetail').find('.name').children('input').val()
         let newoldPrice =$(event.target).parents('#foodDetail').find('.oldPrice').children('input').val()
         let newnewPrice = $(event.target).parents('#foodDetail').find('.newPrice').children('input').val()
@@ -296,6 +309,7 @@ $(()=>{
             description:newDescription,
             info: ''
         }
+        console.log(newImgUrl)
         let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
         for(let j=0; j<allShopList.length; j++){
             let foodList = allShopList[j].foods
@@ -334,8 +348,66 @@ $(()=>{
         deleteFoods(name, 1)
         $('.shopList>.content > .content-ul> li.foods').attr('data-active',0)
     })
-
-
+    $('#addPopUp > div.btn-container, #addPopUp > div.close-container > .close').click(()=>{
+        $('#addPopUp').hide()
+        $('#addPopUp input').val('')
+        $('#addPopUp textarea').val('')
+        $('#addPopUp img').attr("src",'')
+    })
+    $('#addPopUp > div.btn-container>.confirm-btn').click((event)=> {
+        let icon = $(event.target).parents('#addPopUp').find('#showImg').attr('src')
+        let name = $(event.target).parents('#addPopUp').find('.name').children('input').val()
+        let oldPrice = $(event.target).parents('#addPopUp').find('.oldPrice').children('input').val()
+        let price = $(event.target).parents('#addPopUp').find('.newPrice').children('input').val()
+        let description = $(event.target).parents('#addPopUp').find('.description').children('textarea').val()
+        for(let i=0; i<allShopList.length; i++){
+            for(let j=0; j<allShopList[i].foods.length; j++){
+                if(allShopList[i].foods[j].name == name){
+                    alert('菜品不允许同名！')
+                    return
+                }
+            }
+        }
+        let foodObj = {
+            icon,
+            name,
+            oldPrice,
+            price,
+            description,
+            info: ''
+        }
+        let arr = []
+        for(let i = 0; i< $('#addPopUp > div.list>ul>li').length; i++){
+            if($($('#addPopUp > div.list>ul>li')[i]).hasClass('active')){
+                arr.push(i)
+            }
+        }
+        $.ajax({
+            type: "GET",
+            url: 'http://172.20.10.2:3000/addFood',
+            dataType: "json",
+            data: {foodObj, arr},
+            success: function (data) {
+                console.log(data.data)
+            },
+            error: function () {
+                console.log('error')
+            }
+        })
+    })
+    $('#addPopUp > div.list').on('click', 'ul>li', (event)=>{
+        if($(event.target).hasClass('active')){
+            $(event.target).removeClass('active')
+        } else {
+            $(event.target).addClass('active')
+        }
+    })
+    $('#addPopUp > div.container>.upLoadImg').click(()=>{
+        $('#addPopUp > div.container>input[type=file]').click()
+    })
+    $('#addPopUp input[type=file]').change(function () {
+        selectImg(this, $('#addPopUp .newImg')[0])
+    })
 
     function updataList(cSelected) { // 更新已选择列表
         for (let i = 0; i < cSelected.length; i++) {
@@ -588,6 +660,15 @@ $(()=>{
         x += ` <div class="img">
             <img src="${foodObj.oldImgUrl}" alt="">
         </div>
+         <div class="newImg-container">
+            <span>⇨</span>
+            <img src="" alt="" class="newImg">
+        </div>
+        <input type="file" hidden>
+        <div class="upLoadImg">
+            <span class="text">更改图片</span>
+            <span class="icon icon-file">⇧</span>
+        </div>
         <div class="name">
             菜名：<input type="text" value="${foodObj.oldName}">
         </div>
@@ -724,5 +805,89 @@ $(()=>{
             })
         }
         renderShopList(allShopList[index])
+    }
+
+    function addFoods(name, style){
+        let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
+        if(style){
+            for(let j=0; j<allShopList.length; j++){
+                let foodList = allShopList[j].foods
+                for(let i=0; i<foodList.length; i++){
+                    if(foodList[i].name == name){
+                        foodList.splice(i, 1)
+                    }
+                }
+            }
+            $.ajax({
+                type: "GET",
+                url: 'http://172.20.10.2:3000/deleteFood',
+                dataType: "json",
+                data: {name},
+                success: function (data) {
+                    // alert(data.data)
+                    console.log(data.data)
+                },
+                error: function () {
+                    console.log('error')
+                }
+            })
+        } else {
+            let foodList = allShopList[index].foods
+            for(let i=0; i<foodList.length; i++){
+                if(foodList[i].name == name){
+                    foodList.splice(i, 1)
+                }
+            }
+            $.ajax({
+                type: "GET",
+                url: 'http://172.20.10.2:3000/deleteFood',
+                dataType: "json",
+                data: {name,  groupIndex: index},
+                success: function (data) {
+                    // alert(data.data)
+                    console.log(data.data)
+                },
+                error: function () {
+                    console.log('error')
+                }
+            })
+        }
+        renderShopList(allShopList[index])
+    }
+
+    function selectImg(file, image) {
+        if (!file.files || !file.files[0]) {
+            return;
+        }
+        var reader = new FileReader();//读取文件
+        reader.onload = function (event) {//文件读取完成的回调函数
+            //图片读取完成的回调函数（必须加上否则数据读入不完整导致出错！）
+            compressImage(event.target.result, image)
+        }
+        //将文件已Data URL的形式读入页面
+        reader.readAsDataURL(file.files[0]);
+    }
+
+    function compressImage(bdata, image) {//压缩图片
+        var _this = this;
+        var quality = 0.5; //压缩图片的质量
+        var oldimglength = bdata.length;//压缩前的大小
+        var compresRadio = 0;// 压缩率
+        var canvas = document.createElement("canvas"); //创建画布
+        var ctx = canvas.getContext("2d");
+        var img = new Image();
+        img.src = bdata;
+        img.onload = function () {
+            var width = img.width;
+            var height = img.height;
+            canvas.width = 100;   //这里可以自定义你的图片大小
+            canvas.height = 100 * (img.height / img.width);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            var cdata = canvas.toDataURL("image/jpeg", quality);  //将图片转为Base64 之后预览要用
+            _this.HeadUrl = cdata; //预览你压缩后的图片
+            var newimglength = cdata.length;
+            compresRadio = (((oldimglength - newimglength) / oldimglength * 100).toFixed(2)) + '%';
+            image.src = _this.HeadUrl //预览压缩后的图片
+        }
     }
 })

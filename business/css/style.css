@@ -33,3 +33,6 @@
 .icon-goright:before {
   content: "\ea80";
 }
+.icon-file:before {
+  content: "\eae0";
+}
