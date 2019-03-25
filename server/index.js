@@ -11,8 +11,8 @@ var findAllUnPay = util.findAllUnPay
 var insOne = util.insOne
 var delOne = util.delOne
 var findOne = util.findOne
-var file = "./mock.json";
-var file2 = "./mock2.json";
+var file = "../customer/data.json";
+var allShopList = JSON.parse(fs.readFileSync(file))
 var formidable = require("formidable");
 var bodyParser = require("body-parser");
 
@@ -28,7 +28,6 @@ app.all('*', function (req, res, next) {
   if (req.method == "OPTIONS") res.send(200);/*让options请求快速返回*/
   else next();
 });
-
 
 io.on("connection", function (socket) {
   socket.on('cSelected', function (data) { // 监听客户端的订单变化，并更新到商家)
@@ -201,11 +200,7 @@ socket.on('payDeckId', function (data) {
     db.close()
     })
   })
-})
-
-})
-
-
+})})
 
 // 顾客请求
 app.get('/customerInfo', function (req, res) {
@@ -240,7 +235,7 @@ app.get('/unpayList', function (req, res) {
   })
 });
 
-// 商家请求所有已支付列表
+// 商家请求当日所有已支付列表
 app.get('/payList', function (req, res) {
   MongoClient.connect(url, function (err, db) {
     if (err) throw err;
@@ -274,9 +269,58 @@ app.get('/getInputOrderDetail', function (req, res) {
 });
 
 app.get('/allShopList', function (req, res) {
-  var allShopList = JSON.parse(fs.readFileSync(file))
   res.send(JSON.stringify(allShopList))
 })
+
+app.get('/changeShopList', function (req, res) {
+    for(let j=0; j<allShopList.goods.length; j++){
+        let foodList = allShopList.goods[j].foods
+        for(let i=0; i<foodList.length; i++){
+            if(foodList[i].name == req.query.changeShopName){
+                foodList[i] = req.query.foodObj
+            }
+        }
+    }
+    let str = JSON.stringify(allShopList)
+    fs.writeFile(file,str,function(err){
+        if(err){
+            console.error(err);
+        }
+    })
+    res.send({data:'修改成功'})
+})
+
+app.get('/deleteFood', function (req, res) {
+  console.log(req.query)
+    let name = req.query.name
+    let index = req.query.groupIndex
+    if(index !== undefined){
+        let foodList = allShopList.goods[index].foods
+        for(let i=0; i<foodList.length; i++){
+            if(foodList[i].name == name){
+                foodList.splice(i, 1)
+            }
+        }
+    } else {
+        for(let j=0; j<allShopList.goods.length; j++){
+            let foodList = allShopList.goods[j].foods
+            for(let i=0; i<foodList.length; i++){
+                if(foodList[i].name == name){
+                    foodList.splice(i, 1)
+                }
+            }
+        }
+    }
+    let str = JSON.stringify(allShopList)
+    fs.writeFile(file,str,function(err){
+        if(err){
+            console.error(err);
+        }
+    })
+    res.send({data: allShopList})
+})
+
+
 
 app.use('/public', express.static('public'));
 

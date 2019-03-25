@@ -31,9 +31,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       app.get('/api/seller', function (req, res) {
         res.json({errCode: 0, data: data.seller})
       })
-      app.get('/api/ratings', function (req, res) {
-        res.json({errCode: 0, data: data.ratings})
-      })
     },
     clientLogLevel: 'warning',
     historyApiFallback: {

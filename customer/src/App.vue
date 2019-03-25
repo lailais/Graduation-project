@@ -82,7 +82,6 @@ export default {
         res = res.data
         if (res && res.errCode === 0) {
           this.goodsList = res.data // 网络请求数据成功更新data,此时ui还未渲染
-//          console.log(res.data)
         }
       }).catch((err) => {
         console.log(err)

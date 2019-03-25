@@ -21,8 +21,11 @@ ul{
     height: 80vh;
 }
 .footer{
+    position: fixed;
     width: 100%;
     height:10vh;
+    left: 0;
+    bottom: 0;
 }
 .clear{
     clear: both;
@@ -107,6 +110,8 @@ ul{
 .uncookList-container>ul, .unpayList-container>ul, .payList-container>ul{
     width: 90vw;
     margin: 20px auto;
+    height: 75vh;
+    overflow: auto;
 }
 .uncookList-container>ul>li, .unpayList-container>ul>li, .payList-container>ul>li{
     position: relative;
@@ -149,7 +154,7 @@ ul{
     text-align: center;
 }
 .footer>.active{
-    color: red;
+    color: white;
     background: lightgray;
 }
 /*footer*/
@@ -356,5 +361,221 @@ ul{
     font-size: 30px;
     margin-left: 300px;
 }
-
 /*payOrderDetail*/
+
+/*shopList*/
+.shopList{
+    display: none;
+}
+.shopList>.title{
+    height: 50px;
+    width: 100%;
+    font-size: 15px;
+    line-height: 50px;
+    border-bottom: 1px solid gainsboro;
+}
+.shopList>.title>.back>i {
+    margin-left: 10px;
+}
+.shopList>.title>span:nth-child(2){
+    font-weight: 700;
+    font-size: 18px;
+    margin-left: 22%;
+}
+.shopList>.shopList-ul{
+    position: fixed;
+    width: 100%;
+    height: 79vh;
+    overflow: auto;
+}
+.shopList>.shopList-ul>.group-cotainer>.title{
+    width: 100vw;
+    height: 40px;
+    background: #f3f5f7;
+    font-size: 16px;
+    padding-left: 10px;
+    line-height: 40px;
+}
+.shopList > .sub-header > ul{
+    width: 100vw;
+    font-size: 0;
+}
+.shopList > .sub-header > ul > li{
+    display: inline-block;
+    width: 25%;
+    height: 30px;
+    line-height: 30px;
+    border-right: 1px solid aliceblue;
+    border-bottom: 1px solid aliceblue;
+    font-size: 15px;
+    box-sizing: border-box;
+    text-align: center;
+    overflow: hidden;
+}
+.shopList > .sub-header > ul > .active{
+    color: white;
+    background: #00a0dc;
+}
+.shopList>.add{
+    margin: 10px 0 10px 228px;
+    width: 120px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    letter-spacing: 4px;
+    border: 1px solid lavender;
+    border-radius: 5px;
+    color: gray;
+}
+.shopList>.content>ul{
+    margin-bottom: 65px;
+}
+.shopList>.content>ul>li{
+    border-bottom: 1px solid whitesmoke;
+    margin: 10px;
+}
+.shopList>.content>ul>.foods>.icon{
+    float: left;
+}
+.shopList>.content>ul>.foods>.icon>img{
+    width: 65px;
+    height: 65px;
+    display: block;
+}
+.shopList>.content>ul>.foods>.name{
+    float: left;
+    margin: 0 10px 10px;
+    width: 50vw;
+    font-size: 15px;
+}
+.shopList>.content>ul>.foods>.price {
+    float: left;
+    margin: 15px 10px 10px;
+    width: 50vw;
+    font-size: 15px;
+}
+.shopList>.content>ul>.foods>.description{
+    margin-bottom: 45px;
+}
+.shopList>.content>ul>.foods>.description>p{
+    word-break: break-all;
+}
+.shopList>.content>ul>.foods>.btn-container{
+    float: right;
+    position: relative;
+    top: -45px;
+}
+
+/*foodDetail*/
+#foodDetail{
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    padding: 10px;
+    box-sizing: border-box;
+}
+#foodDetail>.container{
+    width: 100%;
+    height: auto;
+}
+#foodDetail>.container>div{
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+#foodDetail>.container>div>input{
+    width: 70%;
+    height: 30px;
+    font-size: 18px;
+    border: none;
+    box-shadow: none;
+    border-bottom: 1px solid gainsboro;
+    outline: none;
+}
+#foodDetail>.container>.name{
+
+}
+#foodDetail>.container>.oldPrice{
+
+}
+#foodDetail>.container>.newPrice{
+
+}
+#foodDetail>.container>.description{
+    position: relative;
+    margin-bottom: 140px;
+}
+#foodDetail>.container>.description>textarea{
+    position: absolute;
+    width: 70%;
+    height: 100px;
+    font-size: 18px;
+    top: 4px;
+    overflow: auto;
+    outline: none;
+}
+#foodDetail>.close {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 30px;
+    margin-left: 300px;
+}
+#foodDetail>.btn-container{
+    text-align: center;
+}
+#foodDetail>.btn-container>.btn{
+    width: 115px;
+}
+/*foodDetail*/
+
+/*deletepopup*/
+#deletePopUp{
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,.5);
+}
+#deletePopUp>.container{
+    width: 80%;
+    height: 185px;
+    background: white;
+    margin: 0 auto;
+    margin-top: 168px;
+}
+#deletePopUp>.container>p {
+    height: 62px;
+    overflow: auto;
+}
+#deletePopUp>.container>.close-container{
+    text-align: right;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+}
+#deletePopUp>.container>.close-container>.close{
+    padding-right: 10px;
+    font-size: 20px;
+}
+#deletePopUp>.container>p{
+    padding: 10px;
+}
+#deletePopUp>.container>.btn-container{
+    padding-top: 10px;
+    padding-bottom: 20px;
+    text-align: center;
+}
+#deletePopUp>.container>.btn-container>.btn{
+    width: 68px;
+}
+
+
+/*deletepopup*/

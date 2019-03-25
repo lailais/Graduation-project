@@ -8,6 +8,8 @@ $(()=>{
     var subOrderDetailDeskId = 0
     var subOrderDetailSubOrderListId = 0
     var payOrderDetailDeskId = 0
+    var allShopList = []
+    var changeShopName = ''
 
     $.ajax({
         type: "GET",
@@ -179,7 +181,7 @@ $(()=>{
         $('#payOrderDetail').hide()
     })
     $('.search>button').click((event)=>{
-        // renderPayOrderDetail($(event.target).siblings('input').val())
+        // 点击搜索订单号的按钮
         let orderId = $(event.target).siblings('input').val()
         // 判断一串字符是不是全部是数字
         var rex = /^[0-9]+$/;//正则表达式
@@ -206,7 +208,134 @@ $(()=>{
         $('.order-info').removeClass('active')
         $('.shopList').show()
         $('.shop-info').addClass('active')
+        $.ajax({
+            type: "GET",
+            url: 'http://172.20.10.2:3000/allShopList',
+            dataType: "json",
+            success: function (data) {
+                allShopList = data.goods
+                renderShopList(allShopList[0])
+                renderSubHeader(0)
+            },
+            error: function (data) {
+                console.log('error')
+            }
+        })
     })
+    $('.shopList>.title>.back').click(()=>{
+        $('.orderList').show()
+        $('.order-info').addClass('active')
+        $('.shopList').hide()
+        $('.shop-info').removeClass('active')
+    })
+    $('.shopList').on('click', '.sub-header > ul > li', (event)=>{
+        let id = $('.sub-header > ul > li').index($(event.target))
+        renderShopList(allShopList[id])
+        $('.shopList>.sub-header>.subHeader-ul>li').removeClass('active')
+        $(`.shopList>.sub-header>.subHeader-ul>li:nth-child(${++id})`).addClass('active')
+    })
+    $('.shopList').on('click', '.add', (event)=>{})
+    $('.shopList').on('click', '.content > .content-ul > li > div.btn-container > .change-btn', (event)=>{
+        let oldImgUrl =  $(event.target).parents('.foods').children('.icon').children('img').attr('src')
+        let oldName = $(event.target).parents('.foods').children('.name').children('span').eq(1).text()
+        let oldoldPrice = $(event.target).parents('.foods').children('.price').find('span').eq(1).text()
+        let oldnewPrice = $(event.target).parents('.foods').children('.price').find('span').eq(3).text()
+        let oldDescription = $(event.target).parents('.foods').children('.description').children('p').text()
+        let foodObj = {
+            oldImgUrl,
+            oldName,
+            oldoldPrice,
+            oldnewPrice,
+            oldDescription
+        }
+        renderFoodDetail(foodObj)
+        changeShopName = oldName
+    })
+    $('.shopList').on('click', '.content > .content-ul > li > div.btn-container > .delete-btn', (event)=> {
+        // console.log(allShopList)
+        let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
+        let name = $(event.target).parents('li.foods').children('.name').children('span').eq(1).text()
+        let count = 0;
+        let arr = []
+        $(event.target).parents('li.foods').attr('data-active',1)
+        for(let i = 0; i<allShopList.length; i++){
+            for(let j = 0; j<allShopList[i].foods.length; j++){
+                let food = allShopList[i].foods[j]
+                if(food.name == name){
+                    count++
+                    arr.push(allShopList[i].name)
+                }
+            }
+        }
+        if(count>1){
+            let x ='该菜式在以下组存在：'
+            for(let i=0; i<arr.length; i++){
+                x += arr[i]+';&nbsp;'
+            }
+            x += '<br/>请选择删除单个或是删除全部！'
+            $('#deletePopUp>.container>p').html(x)
+            $('#deletePopUp').show()
+        }else{
+            deleteFoods(name, 0)
+        }
+    })
+    $('#foodDetail>.close,#foodDetail>.btn-container').click(()=>{
+        $('#foodDetail').css('display','none')
+    })
+    $('#foodDetail>.btn-container>.confirm-btn').click((event)=>{
+        let newImgUrl =  $(event.target).parents('#foodDetail').find('.img').children('img').attr('src')
+        let newName = $(event.target).parents('#foodDetail').find('.name').children('input').val()
+        let newoldPrice =$(event.target).parents('#foodDetail').find('.oldPrice').children('input').val()
+        let newnewPrice = $(event.target).parents('#foodDetail').find('.newPrice').children('input').val()
+        let newDescription = $(event.target).parents('#foodDetail').find('.description').children('textarea').val()
+        let foodObj = {
+            name:newName,
+            price:newnewPrice,
+            oldPrice:newoldPrice,
+            icon:newImgUrl,
+            description:newDescription,
+            info: ''
+        }
+        let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
+        for(let j=0; j<allShopList.length; j++){
+            let foodList = allShopList[j].foods
+            for(let i=0; i<foodList.length; i++){
+                if(foodList[i].name == changeShopName){
+                    foodList[i] = foodObj
+                }
+            }
+        }
+        renderShopList(allShopList[index])
+        $.ajax({
+            type: "GET",
+            url: 'http://172.20.10.2:3000/changeShopList',
+            dataType: "json",
+            data: {changeShopName, foodObj},
+            success: function (data) {
+                alert(data.data)
+            },
+            error: function () {
+                console.log('error')
+            }
+        })
+    })
+    $('#deletePopUp>.container>.close-container>.close, #deletePopUp>.container>.btn-container').click((event)=>{
+        $('#deletePopUp').hide()
+    })
+    $('#deletePopUp>.container>.btn-container>.single-btn').click((event)=>{
+        let deleteElement = $('.shopList>.content > .content-ul> li.foods[data-active=1]')
+        let name = deleteElement.children('.name').children('span').eq(1).text()
+        deleteFoods(name, 0)
+        $('.shopList>.content > .content-ul> li.foods').attr('data-active',0)
+    })
+    $('#deletePopUp>.container>.btn-container>.all-btn').click((event)=>{
+        let deleteElement = $('.shopList>.content > .content-ul> li.foods[data-active=1]')
+        let name = deleteElement.children('.name').children('span').eq(1).text()
+        deleteFoods(name, 1)
+        $('.shopList>.content > .content-ul> li.foods').attr('data-active',0)
+    })
+
+
 
     function updataList(cSelected) { // 更新已选择列表
         for (let i = 0; i < cSelected.length; i++) {
@@ -412,6 +541,69 @@ $(()=>{
         })
     }
 
+    function renderSubHeader(id) {
+        id++
+        let x = ''
+        for(let i=0; i<allShopList.length; i++){
+            x += `<li>${allShopList[i].name}</li>`
+        }
+        $('.shopList>.sub-header>.subHeader-ul').html(x)
+        $('.shopList>.sub-header>.subHeader-ul>li').removeClass('active')
+        $(`.shopList>.sub-header>.subHeader-ul>li:nth-child(${id})`).addClass('active')
+    }
+
+    function renderShopList(list) {
+        // console.log(list)
+        let x = ''
+        for(let i=0; i<list.foods.length; i++){
+            let foods = list.foods[i]
+            x += `<li class="foods">
+                        <div class="icon">
+                            <img src="${foods.icon}">
+                        </div>
+                        <div class="name">
+                            <span>菜名：</span>
+                            <span>${foods.name}</span>
+                        </div>
+                        <div class="price">
+                            <span>原价：<span>${foods.oldPrice}</span></span>
+                            <span>现价：<span>${foods.price}</span></span>
+                        </div>
+                        <div class="clear"></div>
+                        <div class="description">
+                            描述：<p>${foods.description}</p>
+                        </div>
+                        <div class="btn-container">
+                            <span class="delete-btn btn">删除</span>
+                            <span class="change-btn btn">修改</span>
+                        </div>
+                    </li>`
+        }
+        $('.shopList>.content>.content-ul').html(x)
+    }
+
+    function renderFoodDetail(foodObj) {
+        // console.log(foodObj)
+        let x = ''
+        x += ` <div class="img">
+            <img src="${foodObj.oldImgUrl}" alt="">
+        </div>
+        <div class="name">
+            菜名：<input type="text" value="${foodObj.oldName}">
+        </div>
+        <div class="oldPrice">
+            原价：<input type="text" value="${foodObj.oldoldPrice}">
+        </div>
+        <div class="newPrice">
+            现价：<input type="text" value="${foodObj.oldnewPrice}">
+        </div>
+        <div class="description">
+            描述：<textarea>${foodObj.oldDescription}</textarea>
+        </div>`
+        $('#foodDetail>.container').html(x)
+        $('#foodDetail').css('display', 'block')
+    }
+
     function getTemplateDate(date) {
         let y = new Date(date).getFullYear()
         let m = new Date(date).getMonth()+1
@@ -484,5 +676,53 @@ $(()=>{
             'subOrderListId': subOrderListId,
             'deskId': deskId,
         })
+    }
+
+    function deleteFoods(name, style){
+        let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
+        if(style){
+            for(let j=0; j<allShopList.length; j++){
+                let foodList = allShopList[j].foods
+                for(let i=0; i<foodList.length; i++){
+                    if(foodList[i].name == name){
+                        foodList.splice(i, 1)
+                    }
+                }
+            }
+            $.ajax({
+                type: "GET",
+                url: 'http://172.20.10.2:3000/deleteFood',
+                dataType: "json",
+                data: {name},
+                success: function (data) {
+                    // alert(data.data)
+                    console.log(data.data)
+                },
+                error: function () {
+                    console.log('error')
+                }
+            })
+        } else {
+            let foodList = allShopList[index].foods
+            for(let i=0; i<foodList.length; i++){
+                if(foodList[i].name == name){
+                    foodList.splice(i, 1)
+                }
+            }
+            $.ajax({
+                type: "GET",
+                url: 'http://172.20.10.2:3000/deleteFood',
+                dataType: "json",
+                data: {name,  groupIndex: index},
+                success: function (data) {
+                    // alert(data.data)
+                    console.log(data.data)
+                },
+                error: function () {
+                    console.log('error')
+                }
+            })
+        }
+        renderShopList(allShopList[index])
     }
 })

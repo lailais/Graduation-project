@@ -24,6 +24,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-add:before {
+  content: "\ea0a";
+}
 .icon-goleft:before {
   content: "\ea7f";
 }
