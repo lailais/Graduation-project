@@ -325,56 +325,53 @@ app.get('/addFood', function (req, res) {
         let index = Number(arr[k])
         allShopList.goods[index].foods.push(req.query.foodObj)
     }
-    // let str = JSON.stringify(allShopList)
-    // fs.writeFile(file,str,function(err){
-    //     if(err){
-    //         console.error(err);
-    //     }
-    // })
-    res.send({data: allShopList.goods})
-})
-
-
-app.use('/public', express.static('public'));
-
-app.post('/upload', function (req, res) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function (error, fields, files) {
-    // console.log(files)
-    // console.log(fields.id)//from表单元素的其他传参从fields获取！！！！！！  文件信息从files获取！！！
-    if (!files.file) {
-      res.send("没有传图片")
-    } else {
-      fs.writeFileSync(`public/${fields.id}.png`, fs.readFileSync(files.file.path)); // 写入文件
-    }
-    fs.readFile(file, 'utf-8', function (err, data) {
-      if (err) {
-        console.log(err);
-        return;
-      } else {
-        var mock = JSON.parse(data).data
-        for (let i = 0; i < mock.length; i++) {
-          if (mock[i].id == fields.id) {
-            mock[i].name = fields.name
-            mock[i].price = fields.price
-            mock[i].describtion = fields.describtion
-          }
-          // console.log(mock[i].id)
-        }
-        var str = JSON.stringify({"data":mock});//因为nodejs的写入文件只认识字符串或者二进制数，所以把json对象转换成字符串重新写入json文件中
-        fs.writeFile(file, str, function (err) {
-          if (err) {
+    let str = JSON.stringify(allShopList)
+    fs.writeFile(file,str,function(err){
+        if(err){
             console.error(err);
-          }
-          console.log('修改成功');
-          res.send(mock)
-        })
-      }
+        }
     })
-  })
+    res.send({data: '增加成功！'})
 })
 
-
+// app.use('/public', express.static('public'));
+//
+// app.post('/upload', function (req, res) {
+//   var form = new formidable.IncomingForm();
+//   form.parse(req, function (error, fields, files) {
+//     // console.log(files)
+//     // console.log(fields.id)//from表单元素的其他传参从fields获取！！！！！！  文件信息从files获取！！！
+//     if (!files.file) {
+//       res.send("没有传图片")
+//     } else {
+//       fs.writeFileSync(`public/${fields.id}.png`, fs.readFileSync(files.file.path)); // 写入文件
+//     }
+//     fs.readFile(file, 'utf-8', function (err, data) {
+//       if (err) {
+//         console.log(err);
+//         return;
+//       } else {
+//         var mock = JSON.parse(data).data
+//         for (let i = 0; i < mock.length; i++) {
+//           if (mock[i].id == fields.id) {
+//             mock[i].name = fields.name
+//             mock[i].price = fields.price
+//             mock[i].describtion = fields.describtion
+//           }
+//           // console.log(mock[i].id)
+//         }
+//         var str = JSON.stringify({"data":mock});//因为nodejs的写入文件只认识字符串或者二进制数，所以把json对象转换成字符串重新写入json文件中
+//         fs.writeFile(file, str, function (err) {
+//           if (err) {
+//             console.error(err);
+//           }
+//           console.log('修改成功');
+//           res.send(mock)
+//         })
+//       }
+//     })
+//   })
+// })
 // app.post('/server', function (req, res) { // 将图片转换成base64位储存
 //   console.log(req.body.id)
 //     fs.readFile(file, 'utf-8',function (err, data) {

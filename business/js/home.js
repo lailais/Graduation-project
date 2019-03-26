@@ -301,6 +301,9 @@ $(()=>{
         let newoldPrice =$(event.target).parents('#foodDetail').find('.oldPrice').children('input').val()
         let newnewPrice = $(event.target).parents('#foodDetail').find('.newPrice').children('input').val()
         let newDescription = $(event.target).parents('#foodDetail').find('.description').children('textarea').val()
+        if(!newImgUrl){
+            newImgUrl =  $(event.target).parents('#foodDetail').find('.img').children('img').attr('src')
+        }
         let foodObj = {
             name:newName,
             price:newnewPrice,
@@ -309,7 +312,6 @@ $(()=>{
             description:newDescription,
             info: ''
         }
-        console.log(newImgUrl)
         let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
         for(let j=0; j<allShopList.length; j++){
             let foodList = allShopList[j].foods
@@ -355,7 +357,7 @@ $(()=>{
         $('#addPopUp img').attr("src",'')
     })
     $('#addPopUp > div.btn-container>.confirm-btn').click((event)=> {
-        let icon = $(event.target).parents('#addPopUp').find('#showImg').attr('src')
+        let icon = $(event.target).parents('#addPopUp').find('.newImg').attr('src')
         let name = $(event.target).parents('#addPopUp').find('.name').children('input').val()
         let oldPrice = $(event.target).parents('#addPopUp').find('.oldPrice').children('input').val()
         let price = $(event.target).parents('#addPopUp').find('.newPrice').children('input').val()
@@ -376,19 +378,24 @@ $(()=>{
             description,
             info: ''
         }
+        let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
         let arr = []
         for(let i = 0; i< $('#addPopUp > div.list>ul>li').length; i++){
             if($($('#addPopUp > div.list>ul>li')[i]).hasClass('active')){
                 arr.push(i)
             }
         }
+        for(let j=0; j<arr.length; j++){
+            allShopList[Number(arr[j])].foods.push(foodObj)
+        }
+        renderShopList(allShopList[index])
         $.ajax({
             type: "GET",
             url: 'http://172.20.10.2:3000/addFood',
             dataType: "json",
             data: {foodObj, arr},
             success: function (data) {
-                console.log(data.data)
+                alert(data.data)
             },
             error: function () {
                 console.log('error')
@@ -760,54 +767,6 @@ $(()=>{
     }
 
     function deleteFoods(name, style){
-        let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
-        if(style){
-            for(let j=0; j<allShopList.length; j++){
-                let foodList = allShopList[j].foods
-                for(let i=0; i<foodList.length; i++){
-                    if(foodList[i].name == name){
-                        foodList.splice(i, 1)
-                    }
-                }
-            }
-            $.ajax({
-                type: "GET",
-                url: 'http://172.20.10.2:3000/deleteFood',
-                dataType: "json",
-                data: {name},
-                success: function (data) {
-                    // alert(data.data)
-                    console.log(data.data)
-                },
-                error: function () {
-                    console.log('error')
-                }
-            })
-        } else {
-            let foodList = allShopList[index].foods
-            for(let i=0; i<foodList.length; i++){
-                if(foodList[i].name == name){
-                    foodList.splice(i, 1)
-                }
-            }
-            $.ajax({
-                type: "GET",
-                url: 'http://172.20.10.2:3000/deleteFood',
-                dataType: "json",
-                data: {name,  groupIndex: index},
-                success: function (data) {
-                    // alert(data.data)
-                    console.log(data.data)
-                },
-                error: function () {
-                    console.log('error')
-                }
-            })
-        }
-        renderShopList(allShopList[index])
-    }
-
-    function addFoods(name, style){
         let index = $('.shopList > .sub-header > .subHeader-ul > li.active').index()
         if(style){
             for(let j=0; j<allShopList.length; j++){
